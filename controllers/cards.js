@@ -25,16 +25,23 @@ const createCard = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  const { id } = req.params;
+  const { cardId } = req.params;
 
-  return Card.findByIdAndRemove(id)
+  return Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (card) {
         res.status(200).send({ message: 'Карточка успешно удалена' });
       }
       res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(400)
+          .send({ message: 'Переданы некорректные данные при удалении карточки.' });
+      }
+      res.status(500).send({ message: err.message });
+    });
 };
 
 const putLike = (req, res) => {

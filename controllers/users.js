@@ -12,16 +12,23 @@ const getUsers = (req, res) => {
 };
 
 const getUser = (req, res) => {
-  const { id } = req.params;
+  const { userId } = req.params;
 
-  return User.findById(id)
+  return User.findById(userId)
     .then((user) => {
       if (user) {
         res.send({ data: user });
       }
       res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(400)
+          .send({ message: 'Переданы некорректные данные.' });
+      }
+      res.status(500).send({ message: err.message });
+    });
 };
 
 const createUser = (req, res) => {
