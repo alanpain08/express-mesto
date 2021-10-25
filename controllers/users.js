@@ -132,7 +132,16 @@ const login = (req, res, next) => {
     .then((user) => {
       const { NODE_ENV, JWT_SECRET } = process.env;
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
-      res.send({ token });
+      // отправим токен, браузер сохранит его в куках
+
+      res
+        .cookie('jwt', token, {
+          // token - наш JWT токен, который мы отправляем
+          maxAge: 3600000,
+          httpOnly: true,
+          sameSite: true,
+        })
+        .end(); // если у ответа нет тела, можно использовать метод end
     })
     .catch((err) => {
       next(new UnauthorizedError(`${err.message}`));
