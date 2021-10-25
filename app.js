@@ -4,6 +4,7 @@ const { celebrate, Joi, errors } = require('celebrate');
 
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/notFound');
 
 const { PORT = 3000 } = process.env;
 
@@ -18,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().required(),
+    email: Joi.string().required().email(),
     password: Joi.string().required().required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
@@ -26,9 +27,9 @@ app.post('/signup', celebrate({
     avatar: Joi.string().pattern(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/),
   }),
 }), createUser);
-app.post('/login', celebrate({
+app.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required(),
+    email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
 }), login);
@@ -38,8 +39,8 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Ресурс не найден' });
+app.use('*', (next) => {
+  next(new NotFoundError('Ресурс не найден'));
 });
 
 // eslint-disable-next-line no-undef

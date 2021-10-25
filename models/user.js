@@ -15,7 +15,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 8,
     select: false, // хеш пароля пользователя не будет возвращаться из базы
   },
   name: {
@@ -37,7 +36,7 @@ const userSchema = new mongoose.Schema({
     required: false,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
-      validator: (v) => validator.isUrl(v),
+      validator: (v) => validator.isURL(v),
       message: 'Неправильный формат ссылки на аватар',
       protocols: ['http', 'https'],
     },
